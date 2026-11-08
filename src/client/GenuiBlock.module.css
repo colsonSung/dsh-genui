@@ -718,6 +718,26 @@ img.mediaPlayer { aspect-ratio: 16 / 9; object-fit: cover; background: var(--dsl
 .statHero .statValue { font-size: var(--dsl-g-font-stat-hero); line-height: 1.02; letter-spacing: -0.035em; }
 .statHero .statLabel { font-size: var(--dsl-g-font-title); }
 .grid > .stat, .row > .stat { border-left: 1px solid var(--dsl-g-border); }
+/* Metric rows divide the line evenly, like cards did (see .row > .card): a stat
+   used to size to its own content, so a long label stole width from its
+   neighbours and pushed their 34px figures into word-breaking. */
+.row > .stat { flex: 1 1 0; }
+/* A 34px figure needs ~150px of content per card; four of them need ~600px of
+   ROW, which the ordinary reply column does not have (seen: "1080 x 1920"
+   wrapped onto four lines). Below 760px the row steps to two per line; the
+   560px layout rule above then takes it to one. */
+@container (max-width: 760px) {
+  /* Without the wrap the half-width basis is merely squeezed back into one
+     line, which is how the figures broke in the first place. */
+  .row { flex-wrap: wrap; }
+  .row > .stat { flex: 1 1 calc(50% - (var(--dsl-g-gap-md) / 2)); }
+  /* Step the figure with the row: 34px is the four-across dashboard step; on a
+     half-width card it would shout. 28px keeps the figure-to-card ratio the
+     full-width row had. */
+  .row > .stat { --dsl-g-font-stat: max(28px, calc(var(--dsh-content-font-size, 14px) * 1.72)); }
+  /* The left border is a column gutter; a wrapped row has no column to separate. */
+  .row > .stat:nth-child(2n + 1) { border-left: 0; }
+}
 .statLabel {
   font-size: var(--dsl-g-font-meta);
   color: var(--dsw-alias-label-secondary);
@@ -738,7 +758,11 @@ img.mediaPlayer { aspect-ratio: 16 / 9; object-fit: cover; background: var(--dsl
   font-variant-numeric: tabular-nums;
   color: var(--dsw-alias-label-primary);
   line-height: 1.05;
-  overflow-wrap: anywhere;
+  /* Last resort only: a metric that breaks INSIDE a figure ("18.5" / "3",
+     "108 0") is a wrong number, not a wrapped one. `break-word` still splits
+     a genuinely unbreakable token (a long ID) but never splits a number that
+     would have fit on its own line. */
+  overflow-wrap: break-word;
 }
 /* Unit suffix (%, GB, k, ms): same baseline, half the size, muted — the
    number keeps the weight. This is the real typography win in v5. */
