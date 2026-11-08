@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### 文档
+
+- 新增 `docs/fork-sync.md`：本仓库是上游 fork，写明远端约定（`origin` 为 fork、`upstream` 只读）、每次改动前 `git fetch upstream && git merge upstream/main` 的同步步骤、合并后必须 `pnpm run build` 重建 `lib/`、以及本地补丁清单与上游基线；`AGENTS.md` 增加对应入口。
+
 ### 修复
 
 - `stat` 指标行不再把数字拆行：四张卡片挤进约 600px 的正文栏时（34px 图号 + 140px 卡片），`1080 x 1920` 曾被拆成「108 0 x192 0」，`18.53 s` 被拆成「18.5 / 3」。容器宽度 ≤760px 时指标行改为两列并把图号降到 28px；`overflow-wrap` 由 `anywhere` 改为 `break-word`，只在不换行会溢出时才断词。

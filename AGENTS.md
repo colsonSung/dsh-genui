@@ -2,6 +2,14 @@
 
 面向在本仓库里改东西的 agent。只写会被反复违反、且有具体代价的规则；风格偏好不进来。
 
+## 本地 fork 与上游同步
+
+本仓库是 `omdsh-dev/dsh-genui` 的 fork（`origin` = `colsonSung/dsh-genui`，`upstream` = 原作者，只读）。
+
+- 动手改之前先同步：`git fetch upstream && git merge upstream/main`（用 merge，不用 rebase——`main` 已推到 fork）。
+- 改完必须 `pnpm run build`：DSH 加载的是 `lib/`，不是 `src/`；只改源码不重建，页面里没有任何变化。
+- 合并冲突与本地补丁清单见 `docs/fork-sync.md`。
+
 ## 汇报改动：默认用 `compare`
 
 只要回答里要呈现**同一处界面的前后差异**，就用 `compare` 节点，不要并排两张 markdown 图片、也不要表格：
