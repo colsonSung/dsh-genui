@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### 变更
+
+- 插件显示名改为 **Gen-UI**（新增 `locale/en.json`、`locale/zh.json` 的 `meta.title`，并导出 `./locale/*.json`）。包名仍是 `@changfenhuang/dsh-genui`：npm 新包名不允许大写，profile 的 `link:` 依赖和 `cordis.patch.yml` 的行也都按包名寻址；显示名走 locale 资源是宿主约定的换名方式（缺失时才回退到包名）。
+- `scripts/verify-pack.mjs` 支持通配导出键：此前它按字面路径查找，新增的 locale 导出会让打包门禁直接失败。
+
 ### 文档
 
 - 新增 `docs/fork-sync.md`：本仓库是上游 fork，写明远端约定（`origin` 为 fork、`upstream` 只读）、每次改动前 `git fetch upstream && git merge upstream/main` 的同步步骤、合并后必须 `pnpm run build` 重建 `lib/`、以及本地补丁清单与上游基线；`AGENTS.md` 增加对应入口。

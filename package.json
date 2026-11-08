@@ -16,6 +16,7 @@
       "default": "./lib/client.js"
     },
     "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
     "./icon": "./assets/genui-icon.svg",
     "./embed": "./src/client/embed.ts",
     "./assets/mermaid": "./src/client/asset-mermaid.ts",
@@ -36,6 +37,7 @@
     "lib/types/plugin/index.d.ts",
     "lib/types/client/index.d.ts",
     "SKILL.md",
+    "locale/*.json",
     "docs/copy-preview.md",
     "docs/gallery.md",
     "docs/dsh-go.md",

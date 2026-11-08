@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Gen-UI",
+    "description": "Interactive UI rendered right inside assistant replies: layout, charts, plots, forms, quizzes, mermaid, 3D and an action loop back to the model."
+  }
+}

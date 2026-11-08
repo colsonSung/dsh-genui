@@ -74,7 +74,17 @@ try {
   const [packed] = JSON.parse(out)
   const paths = new Set(packed.files.map(f => f.path))
   // npm pack reports paths without the leading './' that exports use.
-  const missing = required.filter(p => !paths.has(p.startsWith('./') ? p.slice(2) : p))
+  // Wildcard export keys ("./locale/*.json") are legitimate: the host resolves
+  // them per-language at runtime, so match them against the packed file list
+  // instead of demanding a literally named file.
+  const escapeSegment = (value) => value.replace(/[.+^${}()|[\]\\]/g, '\\$&')
+  const packedHas = (target) => {
+    const clean = target.startsWith('./') ? target.slice(2) : target
+    if (!clean.includes('*')) return paths.has(clean)
+    const pattern = new RegExp('^' + clean.split('*').map(escapeSegment).join('[^/]*') + '$')
+    return [...paths].some((file) => pattern.test(file))
+  }
+  const missing = required.filter(p => !packedHas(p))
   if (missing.length > 0) {
     console.error(`verify-pack: FAIL — missing required entries: ${missing.join(', ')}`)
     throw new Error('pack verification failed')

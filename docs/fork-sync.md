@@ -59,6 +59,9 @@ pnpm run test      # 单元测试；全绿再往下走
 | 文件 | 本地改动 | 合并提示 |
 | --- | --- | --- |
 | `src/client/GenuiBlock.module.css` | `stat` 指标行：`.row > .stat` 均分宽度；`@container (max-width: 760px)` 两列 + 图号 34px→28px + 换行处去掉列分隔线；`.statValue` 的 `overflow-wrap` 由 `anywhere` 改为 `break-word` | 上游若重写 stat 布局，把这三条规则按新结构重放；不要整块覆盖上游代码 |
+| `locale/en.json`、`locale/zh.json` | 插件显示名与描述（`meta.title` = Gen-UI） | 上游若补了自己的 locale，保留我们的 title，描述按需合并 |
+| `package.json` | `exports` 增加 `./locale/*.json`；`files` 增加 `locale/*.json` | 上游若已导出 locale，去重保留一份 |
+| `scripts/verify-pack.mjs` | 打包门禁支持通配导出键 | 上游若自己支持了通配，删掉我们的实现 |
 | `CHANGELOG.md` | `[Unreleased]` 下的本地条目 | 与上游条目并列保留，按时间倒序 |
 | `AGENTS.md`、`docs/fork-sync.md`、`README.zh-CN.md` | 协作守则与同步流程 | 冲突时以本文件为准 |
 
