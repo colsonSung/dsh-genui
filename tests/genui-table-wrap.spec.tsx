@@ -51,13 +51,17 @@ function wrapperOf(container: HTMLElement): HTMLElement {
 }
 
 describe('table.wrap opt-in prose layout', () => {
-  it('validates the public boolean field and preserves its opt-in meaning', () => {
-    for (const wrap of [true, false]) {
+  it('validates the public boolean field and defaults wrap by content', () => {
+    // A sentence-length column triggers the prose layout on its own; an
+    // explicit wrap:false does not buy the old horizontal scrollbar back.
+    // Short-value tables are the ones that must stay compact.
+    for (const wrap of [true, false, undefined]) {
       const result = processGenuiSpec(proseSpec(wrap))
       expect(result.errors).toEqual([])
-      expect(result.spec?.items[0]).toMatchObject(wrap ? { wrap: true } : { type: 'table' })
-      if (!wrap) expect(result.spec?.items[0]).not.toHaveProperty('wrap')
+      expect(result.spec?.items[0]).toMatchObject({ type: 'table', wrap: true })
     }
+    const short = processGenuiSpec({ items: [{ type: 'table', columns: ['A', 'B'], rows: [['x', 'y']] }] })
+    expect(short.spec?.items[0]).not.toHaveProperty('wrap')
     const value = proseSpec(true)
     expect(processGenuiSpec({ items: [{ ...value.items[0], wrap: 'true' }] }).errors.join(' ')).toContain('wrap')
   })
@@ -66,11 +70,16 @@ describe('table.wrap opt-in prose layout', () => {
     expect(wrapperOf(container).className).toContain('tableWrapProse')
   })
 
-  it('leaves the data-table DOM untouched when wrap is omitted', () => {
-    for (const spec of [proseSpec(), proseSpec(false)]) {
-      const { container } = render(<GenuiBlock spec={spec} />)
+  it('keeps short-value tables on the compact data voice', () => {
+    for (const rows of [[['x', 'y']], [['方案', '具体改动'], ['a', 'b']]]) {
+      const { container } = render(<GenuiBlock spec={{ items: [{ type: 'table', columns: ['A', 'B'], rows }] }} />)
       expect(wrapperOf(container).className).not.toContain('tableWrapProse')
     }
+    // Code / multiline cells never vote for the prose mode.
+    const { container } = render(<GenuiBlock spec={{
+      items: [{ type: 'table', columns: ['A', 'B'], types: ['text', 'code'], rows: [['x', LONG_CELL]] }],
+    }} />)
+    expect(wrapperOf(container).className).not.toContain('tableWrapProse')
   })
 
   it('renders the same cells in both modes (wrap is layout only)', () => {

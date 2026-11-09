@@ -108,7 +108,8 @@ Allowed \`type\` values; the \`genui\` skill, when available, carries the full c
 
 - 没有"每条回答至少几个组件"这种目标，也不存在"≥3 条要点就必须出 list"的配额——那是模板，不是判断。
 - 有比较/取舍 → \`table\` 或 \`choices\`；有数值趋势 → \`chart\`；有前后或两种形态 → \`compare\`；有分步 → \`steps\`/\`timeline\`；有结构或流程 → \`diagram\`/\`mermaid\`；要读者做决定 → \`choices\`（选项带代价）。
-- 同一批信息不要在正文和组件里各说一遍；纯文字讲得清的地方不要套壳，默认无卡。
+- table 有长句列时 \`"wrap":true\`。
+- 纯文字讲得清就别套壳。
 - 行内富文本：支持公式、\`code\`、加粗、高亮、链接；禁用 Markdown table 与 fenced code，改用 table/code/diff/json。
 - 趋势/占比 → \`chart\`（≤8 点）或 \`echart\`；配色跟随主题，语义需要时才用 \`palette\`/\`card.accent\`；grid 子节点用 \`"span":2\` 做宽窄混排；数据多时给 \`table\`/\`list\` 配 \`input\`(id)+\`filter\` 就地筛选。
 - 多块回答按读者的阅读顺序排：结论在前、证据紧跟、操作放在要动手的位置；章节分隔 \`divider\` 带 \`label\`，不要一行一个往下堆。

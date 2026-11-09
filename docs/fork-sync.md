@@ -58,6 +58,9 @@ pnpm run test      # 单元测试；全绿再往下走
 
 | 文件 | 本地改动 | 合并提示 |
 | --- | --- | --- |
+| `src/client/guard.ts` | `table` 换行排版按内容自动判定（`needsProseWrap`），不再只认显式 `wrap` | 上游若调整阈值或判定口径，以我们的单元格样本（24 汉字当量）复核 |
+| `tests/genui-table-wrap.spec.tsx` | 上述默认判定的回归断言 | 断言描述的是新规则，不要把期望值改回旧行为 |
+| `src/plugin/index.ts` | 系统提示里 table 长句列提示；同时删掉一句重复规则以守住 3400 字符预算 | 合并时若超预算，先删重复话术而不是删类型清单 |
 | `src/client/GenuiBlock.module.css` | `stat` 指标行：`.row > .stat` 均分宽度；`@container (max-width: 760px)` 两列 + 图号 34px→28px + 换行处去掉列分隔线；`.statValue` 的 `overflow-wrap` 由 `anywhere` 改为 `break-word` | 上游若重写 stat 布局，把这三条规则按新结构重放；不要整块覆盖上游代码 |
 | `locale/en.json`、`locale/zh.json` | 插件显示名与描述（`meta.title` = Gen-UI） | 上游若补了自己的 locale，保留我们的 title，描述按需合并 |
 | `package.json` | `exports` 增加 `./locale/*.json`；`files` 增加 `locale/*.json` | 上游若已导出 locale，去重保留一份 |
@@ -67,7 +70,7 @@ pnpm run test      # 单元测试；全绿再往下走
 
 ## 版本基线
 
-- 上次合并的上游基线：`c2624ce`（0.16.0，2026-11-03）
+- 上次合并的上游基线：`8ed3999`（0.16.0，2026-11-09，含 0.2.2-rc.1 发布通道）
 
 每次合并后更新这一行：
 

@@ -269,6 +269,38 @@ function sparkValues(v: unknown): number[] | undefined {
 /** Layout hints are component-agnostic: `span` and `when` survive repair on ANY
  *  node (the renderer applies them inside a layout / before paint). Kept out of
  *  the per-case switches so a new component type cannot forget them. */
+/** Sentence-length cell detection for the table wrap default. Measured in
+ * approximate ems at the table's font size: CJK counts 1, Latin/digit 0.5.
+ * A cell needs >= 24 ems before it benefits from wrapping, i.e. it would
+ * render as at least two lines at a readable column width. Pure-numeric or
+ * short values stay compact. Code and multiline cells already wrap
+ * themselves and must not vote. */
+function needsProseWrap({ columns, rows, types }: {
+  columns: string[]
+  rows: unknown[][]
+  types: (string | undefined)[] | undefined
+}): boolean {
+  const thresholdEms = 24
+  for (const row of rows) {
+    for (let i = 0; i < columns.length; i++) {
+      const cell = row[i]
+      if (typeof cell !== 'string') continue
+      const cellType = types?.[i]
+      if (cellType === 'code' || cellType === 'spark') continue
+      if (/\n/.test(cell)) continue
+      const ems = [...cell].reduce((sum, ch) => {
+        const code = ch.codePointAt(0) ?? 0
+        if (code <= 0x7f) return sum + 0.5
+        if (code >= 0x2e80 && code <= 0x9fff) return sum + 1
+        if (code >= 0xac00 && code <= 0xd7a3) return sum + 1
+        if (code >= 0xff00 && code <= 0xff60) return sum + 1
+        return sum + 0.5
+      }, 0)
+      if (ems >= thresholdEms) return true
+    }
+  }
+  return false
+}
 function repairNode(value: unknown, ctx: RepairCtx, depth: number): GenuiNode | null {
   const node = repairNodeFields(value, ctx, depth)
   if (node === null) return null
@@ -731,7 +763,14 @@ function repairNodeFields(value: unknown, ctx: RepairCtx, depth: number): GenuiN
         ...opt('types', types),
         ...opt('total', v.total === true ? true : undefined),
         ...opt('export', v.export === true ? true : undefined),
-        ...opt('wrap', v.wrap === true ? true : undefined),
+        // Sentence-length columns are exactly what wrap exists for. A table
+        // the model forgot to flag should not degenerate into a horizontal
+        // scrollbar: wrap when any non-code, non-multiline cell is long enough
+        // to wrap on its own (approximate ems: CJK 1, Latin 0.5; threshold
+        // chosen at the two-line break-even point). Cells that already opted
+        // out of the nowrap voice (code / multiline) do not vote, so the flag
+        // stays a pure layout decision.
+        ...opt('wrap', v.wrap === true || needsProseWrap({ columns, rows, types }) ? true : undefined),
         ...opt('filter', str(v.filter, 64)),
         ...opt('filterColumn', int(v.filterColumn, 0, GENUI_LIMITS.maxTableCols - 1)),
         ...opt('sortField', str(v.sortField, 64)),
