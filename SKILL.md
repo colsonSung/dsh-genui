@@ -168,6 +168,8 @@ Check CheckCircle Info InfoCircle Warning Error X Plus Minus Circle ArrowDown Ar
 | 语音 / 音乐 / AI 视频 / 演示录像 | `audio`、`video` |
 | 两个方案 / 选项对比 | `table`、`tabs`、`diff` |
 | 教学 / 自测 / 判断题 | `quiz` |
+| 要我拍板 / 选方案（有选项） | `choices`（每题一个 `group`）+ 一个 `submit` |
+| 要我写开放式回答 | `input`/`textarea`（带 `id`）+ `submit` |
 | 数学函数 / 曲线关系 | `plot`（可带参数滑块、动画） |
 | 需要用户操作 / 筛选 / 反馈 | `button`、`input`、`select`、`checkbox`、`radio`、`switch`、`tabs` |
 | 3D 物体 / 空间布局 | `scene3d` |
@@ -180,6 +182,53 @@ Check CheckCircle Info InfoCircle Warning Error X Plus Minus Circle ArrowDown Ar
 
 **别用的情况**：一句话能说清的事、纯闲聊、用户明确说不要 UI、以及"为了炫技硬塞"——组件服务内容，不是内容服务组件。
 
+## 要我拍板的内容：用交互组件收，不要只写在正文里
+
+模型经常在结尾问「要不要继续？」「A 还是 B？」「你来定」——**这种问题本身就是组件**。写成正文列表，读者得复制粘贴或重新组织一次措辞；做成控件，一次点击就把答案结构化回传。
+
+### 四条铁律
+
+1. **能选就别让人打字**：有明确选项的用 `choices`，不要用开放输入框。
+2. **选项必须带代价**：每个 `items[].hint` 写清这个选择的后果（成本、迁移代价、影响面），读者是拿它决策的。
+3. **不预选、不替读者决定**：可以 `recommended` 标注推荐项，但不要说「默认按 A 处理」然后不让人选。
+4. **一次收齐**：多题用一个 `submit` 的 `groups` 聚合，不要每题一个按钮发 4 次往返。
+
+### 模式 A：单个决策（推荐 / 单选）
+
+```json dsh-ui
+{"items":[{"type":"choices","group":"pick","title":"<user-language title>","prompt":"<user-language question>","submit":"<user-language button>","action":"decide","items":[{"label":"<user-language option>","hint":"<one-line cost>","recommended":true},{"label":"<user-language option>","hint":"<one-line cost>"}]}]}
+```
+
+`choices` 不带 `group` 时只是本地选择；要**让答案回到模型**，三种写法任选：带 `group` 并由兄弟 `submit` 提交、直接带 `action`（选完即发）、或两者都写。
+
+### 模式 B：多个决策一屏收（拍板表）
+
+每题一个 `choices`（各自的 `group`），最后**一个** `submit` 用 `groups` 把所有题收进一次 action：
+
+```json dsh-ui
+{"title":"<user-language title>","items":[{"type":"choices","group":"q1","title":"Q1","prompt":"<user-language question>","mode":"single","items":[{"label":"<option>","hint":"<cost>","recommended":true},{"label":"<option>","hint":"<cost>"}]},{"type":"choices","group":"q2","title":"Q2","prompt":"<user-language question>","mode":"single","items":[{"label":"<option>","hint":"<cost>"},{"label":"<option>","hint":"<cost>"}]},{"type":"submit","label":"<user-language button>","action":"decide","groups":["q1","q2"]}]}
+```
+
+提交后 payload 的 `answers` 形如 `{"q1":"<某个 label>","q2":"<某个 label>"}`——每个 `group` 一个键，值就是选项 label。
+
+### 模式 C：开放式问题（没有选项）
+
+没有候选答案时别硬造选项，用 `textarea`（长回答）或 `input`（短回答）带 `id`，再由 `submit` 的 `groups` 收进 `fields`：
+
+```json dsh-ui
+{"items":[{"type":"textarea","id":"note","label":"<user-language label>","placeholder":"<user-language hint>"},{"type":"submit","label":"<user-language button>","action":"answer","groups":["note"]}]}
+```
+
+### 模式 D：混合（半选半写）
+
+典型场景：「选方案 + 写一句理由」。`choices`(group) + `textarea`(id) 同屏，一个 `submit` 的 `groups` 同时列两者。
+
+### 反例
+
+- 正文里写「Q1…Q2…Q3…，你拍板后我继续」——读者要自己组织 4 段话；改成模式 B。
+- 选项没有代价，只有「方案 A / 方案 B」——读者得回头翻正文才能判断。
+- 用 `radio` 做决策——它是 legacy，`choices` 才能给每项带代价与推荐标记。
+- 预选了某项却没告诉读者「这是我替你选的」。
 ## 行内富文本（文字类回答的底座）
 
 `text.content`、`list` 项、`table` 文本列、`keyvalue` 值、`callout` 标题与正文里可以直接写四种行内标记——**重点留在句子里，不必为一个词单起一个组件**：

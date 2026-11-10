@@ -4,6 +4,7 @@
 
 ### 变更
 
+- 要读者拍板的内容改为交互式收集：系统提示新增「选项 → `choices`(`group`)、开放式 → `input`/`textarea`(`id`)、末尾 `submit`(`groups`) 一次收齐」一条，`SKILL.md` 补充四条铁律与四种模式（单题单选 / 多题一屏收 / 开放式 / 混合）及反例。问题不再只写成正文列表。
 - 插件显示名改为 **Gen-UI**（新增 `locale/en.json`、`locale/zh.json` 的 `meta.title`，并导出 `./locale/*.json`）。包名仍是 `@changfenhuang/dsh-genui`：npm 新包名不允许大写，profile 的 `link:` 依赖和 `cordis.patch.yml` 的行也都按包名寻址；显示名走 locale 资源是宿主约定的换名方式（缺失时才回退到包名）。
 - `scripts/verify-pack.mjs` 支持通配导出键：此前它按字面路径查找，新增的 locale 导出会让打包门禁直接失败。
 
